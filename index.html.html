@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Para ti 💛</title>
+
+<style>
+body{
+  margin:0;
+  overflow-x:hidden;
+  font-family:Arial;
+  text-align:center;
+  color:white;
+  background: linear-gradient(180deg, #ff9a9e, #fad0c4);
+}
+
+/* Corazones */
+.heart{
+  position:fixed;
+  top:-10px;
+  font-size:20px;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  to{
+    transform: translateY(100vh);
+  }
+}
+
+h2{
+  margin-top:15px;
+}
+
+/* Tablero */
+#board{
+  width:600px;
+  height:400px;
+  margin:20px auto;
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap:2px;
+  border:3px solid white;
+  background: rgba(255,255,255,0.2);
+}
+
+/* Piezas */
+#pieces{
+  width:600px;
+  margin:20px auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+}
+
+.cell, .piece{
+  width:100px;
+  height:80px;
+}
+
+.cell{
+  border:1px dashed white;
+}
+
+.piece{
+  background-image:url("foto.jpg");
+  background-size:600px 400px;
+  cursor:grab;
+  border-radius:6px;
+}
+
+/* Mensaje final */
+#final{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.8);
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  font-size:28px;
+  padding:20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎵 MÚSICA -->
+<audio id="music" autoplay loop>
+  <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<h2>Arma nuestra historia 💖</h2>
+
+<div id="board"></div>
+
+<h3>Busca las piezas 👇</h3>
+<div id="pieces"></div>
+
+<div id="final">
+  💛 Eres lo mejor que me ha pasado Andrea 💛 <br><br>
+  Te amo muchísimo bebé❤️  
+</div>
+
+<script>
+const rows = 5;
+const cols = 6;
+let correct = 0;
+
+/* 🔊 FORZAR REPRODUCCIÓN (por bloqueo del navegador) */
+document.addEventListener("click", () => {
+  let music = document.getElementById("music");
+  if (music.paused) {
+    music.play();
+  }
+});
+
+/* 💖 CORAZONES */
+function crearCorazon(){
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerHTML = "💖";
+  heart.style.left = Math.random()*100 + "vw";
+  heart.style.animationDuration = (3 + Math.random()*5) + "s";
+  heart.style.fontSize = (15 + Math.random()*20) + "px";
+  document.body.appendChild(heart);
+
+  setTimeout(()=>{ heart.remove(); },8000);
+}
+setInterval(crearCorazon, 300);
+
+/* 🧩 TABLERO */
+const board = document.getElementById("board");
+for(let i=0;i<rows*cols;i++){
+  let cell = document.createElement("div");
+  cell.className="cell";
+  cell.dataset.index=i;
+
+  cell.ondragover = e => e.preventDefault();
+
+  cell.ondrop = e=>{
+    let pieceId = e.dataTransfer.getData("text");
+    let piece = document.getElementById(pieceId);
+
+    if(cell.children.length === 0){
+      cell.appendChild(piece);
+
+      if(piece.dataset.correct == cell.dataset.index){
+        correct++;
+      }
+
+      checkWin();
+    }
+  };
+
+  board.appendChild(cell);
+}
+
+/* 🧩 PIEZAS */
+const piecesContainer = document.getElementById("pieces");
+let indices = [];
+
+for(let i=0;i<rows*cols;i++){
+  indices.push(i);
+}
+
+indices.sort(()=>Math.random()-0.5);
+
+indices.forEach(i=>{
+  let piece = document.createElement("div");
+  piece.className="piece";
+  piece.id="p"+i;
+  piece.draggable=true;
+  piece.dataset.correct=i;
+
+  let x = (i % cols) * 100;
+  let y = Math.floor(i / cols) * 80;
+
+  piece.style.backgroundPosition = `-${x}px -${y}px`;
+
+  piece.ondragstart = e=>{
+    e.dataTransfer.setData("text", piece.id);
+  };
+
+  piecesContainer.appendChild(piece);
+});
+
+/* 💛 FINAL */
+function checkWin(){
+  if(correct === rows*cols){
+    document.getElementById("final").style.display="flex";
+  }
+}
+</script>
+
+</body>
+</html>
